@@ -485,6 +485,8 @@ body {
 .btn-refresh:hover { background: rgba(255,255,255,0.2); }
 .btn-logout { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
 .btn-logout:hover { background: rgba(201,168,76,0.25); }
+.btn-clear { background: rgba(225,29,72,0.15); color: #e11d48; border: 1px solid rgba(225,29,72,0.3); }
+.btn-clear:hover { background: rgba(225,29,72,0.25); }
 
 .admin-content { padding: 32px; max-width: 1100px; margin: 0 auto; }
 
@@ -1101,6 +1103,7 @@ tr:hover td { background: #f8faff; }
       </div>
       <div class="admin-topbar-right">
         <button class="btn-topbar btn-refresh" onclick="loadSubmissions()">↻ Refresh</button>
+        <button class="btn-topbar btn-clear" onclick="clearHistory()">🗑 Clear History</button>
         <button class="btn-topbar btn-logout" onclick="adminLogout()">Logout</button>
       </div>
     </div>
@@ -1306,6 +1309,25 @@ async function loadSubmissions() {
     renderTable(data);
   } catch(err) {
     document.getElementById('table-body').innerHTML = `<div class="empty-state" style="color:#e11d48">Error: ${err.message}</div>`;
+  }
+}
+
+// CLEAR HISTORY
+async function clearHistory() {
+  if (!confirm('⚠️ Are you sure? This will delete ALL submissions permanently. This cannot be undone.')) {
+    return;
+  }
+  if (!confirm('This is your final warning. Click OK to delete everything.')) {
+    return;
+  }
+  
+  try {
+    const { error } = await db.from(TABLE).delete().gte('id', 0);
+    if (error) throw error;
+    alert('✓ All submissions have been cleared.');
+    loadSubmissions();
+  } catch(err) {
+    alert(`Error clearing history: ${err.message}`);
   }
 }
 
