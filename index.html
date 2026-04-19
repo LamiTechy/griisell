@@ -1322,8 +1322,16 @@ async function clearHistory() {
   }
   
   try {
-    const { error } = await db.from(TABLE).delete().gte('id', 0);
-    if (error) throw error;
+    const { data, error: fetchError } = await db.from(TABLE).select('id');
+    if (fetchError) throw fetchError;
+    
+    if (data && data.length > 0) {
+      // Delete all records by their IDs
+      const ids = data.map(r => r.id);
+      const { error } = await db.from(TABLE).delete().in('id', ids);
+      if (error) throw error;
+    }
+    
     alert('✓ All submissions have been cleared.');
     loadSubmissions();
   } catch(err) {
